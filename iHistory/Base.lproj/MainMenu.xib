@@ -671,7 +671,7 @@
                 </menuItem>
             </items>
         </menu>
-        <window title="iHistory" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="QvC-M9-y7g">
+        <window title="iHistory - Current Song" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="QvC-M9-y7g">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="324" y="369" width="400" height="219"/>
@@ -725,7 +725,7 @@
                     </textField>
                 </subviews>
             </view>
-            <point key="canvasLocation" x="-105" y="326.5"/>
+            <point key="canvasLocation" x="-182" y="407.5"/>
         </window>
     </objects>
 </document>
