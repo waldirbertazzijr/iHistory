@@ -62,4 +62,11 @@ NSInteger delayToSend = 10;
     currentProgress++;
 }
 
+- (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag {
+    
+    [_window makeKeyAndOrderFront:self];
+    
+    return YES;
+}
+
 @end
