@@ -12,6 +12,10 @@
 @interface AppDelegate ()
 @end
 
+// Edit this url to point to your backend script
+NSString* urlToSend = @"http://example.com/";
+
+// Other assets
 iTunesApplication *iTunes;
 NSTimer *timer;
 NSDistributedNotificationCenter *dnc;
@@ -19,7 +23,6 @@ NSLocale* currentLocale;
 NSDateFormatter *dateFormatter;
 NSInteger currentProgress = 0;
 NSInteger delayToSend = 5;
-NSString* urlToSend = @"http://example.com/";
 
 @implementation AppDelegate
 
