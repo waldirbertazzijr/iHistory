@@ -673,12 +673,18 @@
                 <menuItem title="Current Song" enabled="NO" id="0Hz-s2-EIr">
                     <modifierMask key="keyEquivalentModifierMask"/>
                 </menuItem>
-                <menuItem isSeparatorItem="YES" id="MDb-1q-tc3"/>
                 <menuItem title="Status" enabled="NO" id="lFn-DI-PsA">
                     <modifierMask key="keyEquivalentModifierMask"/>
                 </menuItem>
+                <menuItem isSeparatorItem="YES" id="MDb-1q-tc3"/>
+                <menuItem title="Quit" id="iMQ-IB-4WF">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="terminate:" target="-1" id="BHA-EH-UYe"/>
+                    </connections>
+                </menuItem>
             </items>
-            <point key="canvasLocation" x="23" y="525.5"/>
+            <point key="canvasLocation" x="118" y="642.5"/>
         </menu>
     </objects>
 </document>

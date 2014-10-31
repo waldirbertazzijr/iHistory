@@ -10,14 +10,16 @@
 #import "iTunes.h"
 
 @interface AppDelegate ()
-@property (weak) IBOutlet NSWindow *window;
 @end
 
 iTunesApplication *iTunes;
 NSTimer *timer;
 NSDistributedNotificationCenter *dnc;
+NSLocale* currentLocale;
+NSDateFormatter *dateFormatter;
 NSInteger currentProgress = 0;
-NSInteger delayToSend = 10;
+NSInteger delayToSend = 5;
+NSString* urlToSend = @"http://example.com/";
 
 @implementation AppDelegate
 
@@ -26,7 +28,7 @@ NSInteger delayToSend = 10;
 - (void) awakeFromNib {
     self.statusBar = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
     
-    self.statusBar.title = @"H";
+    self.statusBar.title = @"iH";
     
     // you can also set an image
     //self.statusBar.image =
@@ -42,9 +44,13 @@ NSInteger delayToSend = 10;
     dnc = [NSDistributedNotificationCenter defaultCenter];
     [dnc addObserver:self selector:@selector(updateTrackName) name:@"com.apple.iTunes.playerInfo" object:nil];
     
+    // Other initializations
+    currentLocale = [NSLocale currentLocale];
+    dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    
     // Update current track name
     [self updateTrackName];
-
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -56,7 +62,7 @@ NSInteger delayToSend = 10;
     currentProgress = 0;
     
     // updates visually
-    NSString *trackName = [NSString stringWithFormat:@"%@ - %@ (%@) [%d]",
+    NSString *trackName = [NSString stringWithFormat:@"Now Playing: %@ - %@ (%@) [%d]",
                            [[iTunes currentTrack] name],
                            [[iTunes currentTrack] artist],
                            [[iTunes currentTrack] album],
@@ -68,22 +74,49 @@ NSInteger delayToSend = 10;
 }
 
 -(void)countTimer {
-    [self.currentStatusMenu setTitle:[NSString stringWithFormat:@"Validating listening in %ld seconds...",
+    self.statusBar.title = [NSString stringWithFormat:@"%ld", (delayToSend - currentProgress)];
+    [self.currentStatusMenu setTitle:[NSString stringWithFormat:@"Status: Sending in %lds...",
                                       (delayToSend - currentProgress)]];
     
     if (currentProgress == delayToSend) {
-        [self.currentStatusMenu setTitle:@"Music sent"];
+        [self sendMusic];
         [timer invalidate];
+        self.statusBar.title = @"iH";
     }
     
     currentProgress++;
 }
 
-- (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag {
+-(void)sendMusic {
+    NSString *post = [NSString stringWithFormat:@"tname=%@&tartist=%@&talbum=%@&tyear=%d&datetime=%@",
+                      [[iTunes currentTrack] name],
+                      [[iTunes currentTrack] artist],
+                      [[iTunes currentTrack] album],
+                      (int)[[iTunes currentTrack] year],
+                      [dateFormatter stringFromDate:[NSDate date]]
+                      ];
+    // NSLog(post);
+    NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+    NSString *postLength = [NSString stringWithFormat:@"%d",(int)[postData length]];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+    [request setURL:[NSURL URLWithString:urlToSend]];
+    [request setHTTPMethod:@"POST"];
+    [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
+    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    [request setHTTPBody:postData];
+    NSURLConnection *conn = [[NSURLConnection alloc] initWithRequest:request delegate:self];
     
-    [_window makeKeyAndOrderFront:self];
+    if(conn) {
+        [self.currentStatusMenu setTitle:@"Status: Sent"];
+    } else {
+        [self.currentStatusMenu setTitle:@"Status: Couldn't Send"];
+    }
     
-    return YES;
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData*)data {
+    // NSLog(@"Rodou");
+    // NSLog(@"%@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
 }
 
 @end
