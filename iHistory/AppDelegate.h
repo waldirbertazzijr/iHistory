@@ -10,10 +10,10 @@
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 
-@property (weak) IBOutlet NSTextField *currentSong;
-@property (weak) IBOutlet NSTextField *currentArtist;
-@property (weak) IBOutlet NSProgressIndicator *sendTimeoutProgress;
-@property (weak) IBOutlet NSTextField *statusText;
+@property (strong, nonatomic) IBOutlet NSMenu *statusMenu;
+@property (weak) IBOutlet NSMenuItem *currentSongMenu;
+@property (weak) IBOutlet NSMenuItem *currentStatusMenu;
+@property (strong, nonatomic) NSStatusItem *statusBar;
 
 @end
 

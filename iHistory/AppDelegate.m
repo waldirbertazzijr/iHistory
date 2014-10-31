@@ -10,10 +10,8 @@
 #import "iTunes.h"
 
 @interface AppDelegate ()
-
 @property (weak) IBOutlet NSWindow *window;
 @end
-
 
 iTunesApplication *iTunes;
 NSTimer *timer;
@@ -23,14 +21,29 @@ NSInteger delayToSend = 10;
 
 @implementation AppDelegate
 
+@synthesize statusBar = _statusBar;
+
+- (void) awakeFromNib {
+    self.statusBar = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
+    
+    self.statusBar.title = @"H";
+    
+    // you can also set an image
+    //self.statusBar.image =
+    
+    self.statusBar.menu = self.statusMenu;
+    self.statusBar.highlightMode = YES;
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-    // Insert code here to initialize your application
+    
+    // Itunes and Notification center
     iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"];
     dnc = [NSDistributedNotificationCenter defaultCenter];
-    
     [dnc addObserver:self selector:@selector(updateTrackName) name:@"com.apple.iTunes.playerInfo" object:nil];
+    
+    // Update current track name
     [self updateTrackName];
-    [self.sendTimeoutProgress setMaxValue:delayToSend];
 
 }
 
@@ -43,19 +56,23 @@ NSInteger delayToSend = 10;
     currentProgress = 0;
     
     // updates visually
-    [self.currentSong setStringValue:[[iTunes currentTrack] name]];
-    [self.currentArtist setStringValue:[[iTunes currentTrack] artist]];
+    NSString *trackName = [NSString stringWithFormat:@"%@ - %@ (%@) [%d]",
+                           [[iTunes currentTrack] name],
+                           [[iTunes currentTrack] artist],
+                           [[iTunes currentTrack] album],
+                           (int)[[iTunes currentTrack] year]];
     
+    [self.currentSongMenu setTitle:trackName];
     [timer invalidate];
     timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(countTimer) userInfo:nil repeats:YES];
 }
 
 -(void)countTimer {
-    [self.statusText setStringValue:[NSString stringWithFormat:@"Validating listening in %ld seconds...",(delayToSend - currentProgress)]];
-    [self.sendTimeoutProgress setDoubleValue:currentProgress];
+    [self.currentStatusMenu setTitle:[NSString stringWithFormat:@"Validating listening in %ld seconds...",
+                                      (delayToSend - currentProgress)]];
     
     if (currentProgress == delayToSend) {
-        [self.statusText setStringValue:@"Sent."];
+        [self.currentStatusMenu setTitle:@"Music sent"];
         [timer invalidate];
     }
     
