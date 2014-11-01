@@ -22,7 +22,7 @@ NSDistributedNotificationCenter *dnc;
 NSLocale* currentLocale;
 NSDateFormatter *dateFormatter;
 NSInteger currentProgress = 0;
-NSInteger delayToSend = 5;
+NSInteger delayToSend = 15;
 
 @implementation AppDelegate
 
@@ -45,7 +45,7 @@ NSInteger delayToSend = 5;
     // Itunes and Notification center
     iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"];
     dnc = [NSDistributedNotificationCenter defaultCenter];
-    [dnc addObserver:self selector:@selector(updateTrackName) name:@"com.apple.iTunes.playerInfo" object:nil];
+    [dnc addObserver:self selector:@selector(iTunesUpdated) name:@"com.apple.iTunes.playerInfo" object:nil];
     
     // Other initializations
     currentLocale = [NSLocale currentLocale];
@@ -53,30 +53,54 @@ NSInteger delayToSend = 5;
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     
     // Update current track name
-    [self updateTrackName];
+    [self iTunesUpdated];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
 }
 
-- (void)updateTrackName {
-    // resets counter
-    currentProgress = 0;
+- (void)iTunesUpdated {
+    // update the music title
+    [self updateMusic];
+    [timer invalidate];
     
-    // updates visually
-    NSString *trackName = [NSString stringWithFormat:@"Now Playing: %@ - %@ (%@) [%d]",
+    if ([iTunes playerState] == iTunesEPlSPlaying) {
+        
+        // resets counter
+        currentProgress = 0;
+        timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updateTimer) userInfo:nil repeats:YES];
+        
+    } else if ([iTunes playerState] == iTunesEPlSPaused) {
+        
+        // dont reset counter, because if user starts playing again i will resume the counter
+        [self.currentStatusMenu setTitle:[NSString stringWithFormat:@"Status: Paused"]];
+        
+    } else if ([iTunes playerState] == iTunesEPlSStopped) {
+        
+        [self.currentStatusMenu setTitle:[NSString stringWithFormat:@"Status: Stopped"]];
+        
+    }
+}
+
+-(void)updateMusic {
+    NSString *trackName;
+    
+    // Updates music title
+    if ([iTunes playerState] !=  iTunesEPlSStopped) {
+        trackName = [NSString stringWithFormat:@"Now Playing: %@ - %@ (%@) [%d]",
                            [[iTunes currentTrack] name],
                            [[iTunes currentTrack] artist],
                            [[iTunes currentTrack] album],
                            (int)[[iTunes currentTrack] year]];
+    } else {
+        trackName = @"Now Playing: Nothing";
+    }
     
     [self.currentSongMenu setTitle:trackName];
-    [timer invalidate];
-    timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(countTimer) userInfo:nil repeats:YES];
 }
 
--(void)countTimer {
+-(void)updateTimer {
     self.statusBar.title = [NSString stringWithFormat:@"%ld", (delayToSend - currentProgress)];
     [self.currentStatusMenu setTitle:[NSString stringWithFormat:@"Status: Sending in %lds...",
                                       (delayToSend - currentProgress)]];
