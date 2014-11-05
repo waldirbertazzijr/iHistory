@@ -13,7 +13,7 @@
 @end
 
 // Edit this url to point to your backend script
-NSString* urlToSend = @"http://example.com/";
+NSString* urlToSend = @"http://projects.waldir.org/ihistory/post.php";
 
 // Other assets
 iTunesApplication *iTunes;
@@ -52,18 +52,27 @@ NSInteger delayToSend = 15;
     dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     
-    // Update current track name
-    [self iTunesUpdated];
+    // Set initial values for menu items
+    if ([iTunes isRunning] && [iTunes playerState] == iTunesEPlSPlaying) {
+        [self iTunesUpdated];
+    } else {
+        [self.currentSongMenu setTitle:[NSString stringWithFormat:@"Now Playing: Nothing"]];
+        [self.currentStatusMenu setTitle:[NSString stringWithFormat:@"Status: Ready"]];
+    }
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
+    [dnc removeObserver:self];
 }
 
 - (void)iTunesUpdated {
     // update the music title
     [self updateMusic];
     [timer invalidate];
+    
+    // If its not running, terminate
+    if(![iTunes isRunning]) return;
     
     if ([iTunes playerState] == iTunesEPlSPlaying) {
         
@@ -85,6 +94,12 @@ NSInteger delayToSend = 15;
 
 -(void)updateMusic {
     NSString *trackName;
+    
+    NSLog(@"Rodou update music");
+    NSLog(@"%@", iTunes);
+    
+    // If itunes is not running, terminate
+    if(![iTunes isRunning]) return;
     
     // Updates music title
     if ([iTunes playerState] !=  iTunesEPlSStopped) {
@@ -142,8 +157,8 @@ NSInteger delayToSend = 15;
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData*)data {
-    // NSLog(@"Rodou");
-    // NSLog(@"%@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+    NSLog(@"Rodou");
+    NSLog(@"%@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
 }
 
 @end
